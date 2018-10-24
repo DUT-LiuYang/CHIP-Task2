@@ -17,8 +17,8 @@ class BaseModel:
 
         # some basic parameters of the model
         self.model = None
-        self.max_len = 43
-        self.num_words = 9647
+        self.max_len = 100
+        self.num_words = 6820
 
         # pre-trained embeddings and their parameters.
 
