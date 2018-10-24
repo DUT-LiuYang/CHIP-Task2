@@ -1,5 +1,6 @@
 
 from utils import PRF, print_metrics
+from sklearn.model_selection import StratifiedKFold
 from keras.models import Model
 from keras.layers import *
 from preprocess.csv_reader import CsvReader
@@ -25,7 +26,7 @@ class BaseModel:
         self.embedding_trainable = False
         self.EMBEDDING_DIM = 300
 
-        self.train_question_inputs1, self.train_question_inputs2 = [None, None]
+        self.train_question_inputs1, self.train_question_inputs2, self.train_label = None, None, None
         self.test_question_inputs1, self.test_question_inputs2 = None, None
         self.load_data()
 
@@ -33,12 +34,14 @@ class BaseModel:
         self.output = self.build_model()
         self.model = Model(inputs=[self.Q1, self.Q2], outputs=self.output)
 
-
     def build_model(self):
         raise NotImplementedError
 
-    def train_model(self, epochs):
-        for e in range(epochs)
+    def train_model(self, epochs, kfold_num=0):
+        kfold = StratifiedKFold(n_splits=kfold_num, shuffle=True)
+        for index in kfold.split(self.train_question_inputs1, self.)
+        for e in range(epochs):
+            self.model.fit()
 
 
     def predict(self):
@@ -69,6 +72,7 @@ class BaseModel:
         self.embedding_matrix = er.get_embedding_matrix("../instances/word_embed.txt")
         self.train_question_inputs1, self.train_question_inputs2 = er.question_pairs2question_inputs(inputs=train_data,
                                                                                                      id_questions=id_question)
+        self.train_label = train_label
 
     def read_model(self, file=""):
         self.build_model()
