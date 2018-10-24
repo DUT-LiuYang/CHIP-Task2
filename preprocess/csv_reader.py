@@ -20,12 +20,13 @@ class CsvReader:
             temp = []
             for index, value in enumerate(row):
                 if train:
-                    if index == 0:
+                    if index == 2:
                         label.append(value)
                     else:
                         temp.append(value)
                 else:
-                    temp.append(value)
+                    if index < 2:
+                        temp.append(value)
 
             data.append(temp[:])
 
