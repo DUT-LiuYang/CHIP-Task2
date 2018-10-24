@@ -24,6 +24,7 @@ class BaseModel:
         self.EMBEDDING_DIM = 300
 
         self.train_question_inputs1, self.train_question_inputs2 = [None, None]
+        self.test_question_inputs1, self.test_question_inputs2 = None, None
         self.load_data()
 
         self.Q1, self.Q2 = self.make_input()
@@ -38,7 +39,7 @@ class BaseModel:
         pass
 
     def predict(self):
-
+        results = self.model.predict([self.test_question_inputs1, self.test_question_inputs2], batch_size=128, verbose=0)
 
 
 
