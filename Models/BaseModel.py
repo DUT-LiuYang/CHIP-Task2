@@ -1,4 +1,3 @@
-
 from utils import PRF, print_metrics
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from keras.models import Model
@@ -17,8 +16,8 @@ class BaseModel:
 
         # some basic parameters of the model
         self.model = None
-        self.max_len = 100
-        self.num_words = 6820
+        self.max_len = 43
+        self.num_words = 9647
 
         # pre-trained embeddings and their parameters.
 
@@ -72,11 +71,9 @@ class BaseModel:
                            [dev_data0, dev_data1], dev_label)
 
 
-
     def predict(self):
         results = self.model.predict([self.test_question_inputs1, self.test_question_inputs2], batch_size=128, verbose=0)
         res = results.argmax(axis=1)
-
 
     def save_model(self, file=""):
         self.model.save_weights(self.save_dir + file)
@@ -102,6 +99,8 @@ class BaseModel:
         self.train_question_inputs1, self.train_question_inputs2 = er.question_pairs2question_inputs(inputs=train_data,
                                                                                                      id_questions=id_question)
         self.train_label = train_label
+        self.test_question_inputs1, self.test_question_inputs2 = er.question_pairs2question_inputs(inputs=test_data,
+                                                                                                   id_questions=id_question)
 
     def read_model(self, file=""):
         self.build_model()
