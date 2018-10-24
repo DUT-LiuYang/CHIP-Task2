@@ -1,4 +1,4 @@
-
+from keras.models import Model
 from keras.layers import *
 from preprocess.csv_reader import CsvReader
 from preprocess.example_reader import ExampleReader
@@ -28,6 +28,7 @@ class BaseModel:
 
         self.Q1, self.Q2 = self.make_input()
         self.output = self.build_model()
+        self.model = Model(inputs=[self.Q1, self.Q2], outputs=self.output)
 
 
     def build_model(self):
