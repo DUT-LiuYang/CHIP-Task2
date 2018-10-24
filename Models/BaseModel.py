@@ -1,3 +1,5 @@
+
+from utils import PRF, print_metrics
 from keras.models import Model
 from keras.layers import *
 from preprocess.csv_reader import CsvReader
@@ -35,12 +37,13 @@ class BaseModel:
     def build_model(self):
         raise NotImplementedError
 
-    def train_model(self):
-        pass
+    def train_model(self, epochs):
+        for e in range(epochs)
+
 
     def predict(self):
         results = self.model.predict([self.test_question_inputs1, self.test_question_inputs2], batch_size=128, verbose=0)
-
+        res = results.argmax(axis=1)
 
 
     def save_model(self, file=""):
@@ -72,8 +75,8 @@ class BaseModel:
         self.model.load_weights(self.save_dir + file)
 
     def make_input(self):
-        Q1 = Input(shape=[], dtype='int32')
-        Q2 = Input(shape=[], dtype='int32')
+        Q1 = Input(shape=[self.max_len], dtype='int32')
+        Q2 = Input(shape=[self.max_len], dtype='int32')
         return Q1, Q2
 
 
