@@ -1,3 +1,5 @@
+
+from keras.layers import *
 from preprocess.csv_reader import CsvReader
 from preprocess.example_reader import ExampleReader
 
@@ -24,14 +26,21 @@ class BaseModel:
         self.train_question_inputs1, self.train_question_inputs2 = [None, None]
         self.load_data()
 
+        self.Q1, self.Q2 = self.make_input()
+        self.output = self.build_model()
+        self.predict()
+
+
     def build_model(self):
-        pass
+        raise NotImplementedError
 
     def train_model(self):
         pass
 
     def predict(self):
-        pass
+
+
+
 
     def save_model(self, file=""):
         self.model.save_weights(self.save_dir + file)
@@ -60,3 +69,12 @@ class BaseModel:
     def read_model(self, file=""):
         self.build_model()
         self.model.load_weights(self.save_dir + file)
+
+    def make_input(self):
+        Q1 = Input(shape=[], dtype='int32')
+        Q2 = Input(shape=[], dtype='int32')
+        return Q1, Q2
+
+
+
+
