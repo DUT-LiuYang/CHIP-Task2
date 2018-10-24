@@ -28,7 +28,6 @@ class BaseModel:
 
         self.Q1, self.Q2 = self.make_input()
         self.output = self.build_model()
-        self.predict()
 
 
     def build_model(self):
