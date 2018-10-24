@@ -58,9 +58,5 @@ class BaseModel:
                                                                                                      id_questions=id_question)
 
     def read_model(self, file=""):
-        self.model = self.build_model()
-        self.model.
-
-
-
-
+        self.build_model()
+        self.model.load_weights(self.save_dir + file)
