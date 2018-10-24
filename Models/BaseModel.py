@@ -69,8 +69,6 @@ class BaseModel:
         self.embedding_matrix = er.get_embedding_matrix("../instances/word_embed.txt")
         self.train_question_inputs1, self.train_question_inputs2 = er.question_pairs2question_inputs(inputs=train_data,
                                                                                                      id_questions=id_question)
-        self.test_question_inputs1, self.test_question_inputs2 = er.question_pairs2question_inputs(inputs=test_data,
-                                                                                                   id_questions=id_question)
 
     def read_model(self, file=""):
         self.build_model()
