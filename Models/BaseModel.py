@@ -1,6 +1,6 @@
 
 from utils import PRF, print_metrics
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from keras.models import Model
 from keras.layers import *
 from preprocess.csv_reader import CsvReader
@@ -37,11 +37,40 @@ class BaseModel:
     def build_model(self):
         raise NotImplementedError
 
-    def train_model(self, epochs, kfold_num=0):
-        kfold = StratifiedKFold(n_splits=kfold_num, shuffle=True)
-        for index in kfold.split(self.train_question_inputs1, self.)
+    def one_train(self, epochs, batch_size,
+                  train_data, train_label,
+                  dev_data, dev_label):
         for e in range(epochs):
-            self.model.fit()
+            self.model.fit(train_data, train_label, batch_size=batch_size, verbose=0,
+                           validation_data=(dev_data, dev_label))
+            dev_out = self.model.predict(dev_data, batch_size=2 * batch_size, verbose=0)
+            metrics = PRF(dev_label.argmax(axis=1), dev_out.argmax(axis=1))
+            metrics['epoch'] = e + 1
+            print_metrics(metrics, metrics_type='dev')
+
+    def train_model(self, epochs, batch_size, kfold_num=0):
+        if kfold_num > 1:
+            kfold = StratifiedKFold(n_splits=kfold_num, shuffle=True)
+            for train_index, dev_index in kfold.split(self.train_question_inputs1, self.train_label):
+                train_data = self.train_question_inputs1[train_index], self.train_question_inputs2[train_index]
+                train_label = self.train_label[train_index]
+                dev_data = self.train_question_inputs1[dev_index], self.train_question_inputs2[dev_index]
+                dev_label = self.train_label[dev_index]
+
+                self.one_train(epochs, batch_size,
+                               train_data, train_label, dev_data, dev_label)
+
+        else:
+            train_data0, train_data1, \
+            dev_data0, dev_data1, \
+            train_label, dev_label = train_test_split([self.train_question_inputs1, self.train_question_inputs2,
+                                                       self.train_label],
+                                                      test_size=0.2,
+                                                      random_state=1)
+            self.one_train(epochs, batch_size,
+                           [train_data0, train_data1], train_label,
+                           [dev_data0, dev_data1], dev_label)
+
 
 
     def predict(self):
