@@ -2,6 +2,7 @@ from utils import PRF, print_metrics
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from keras.models import Model
 from keras.layers import *
+from keras.optimizers import get
 from preprocess.csv_reader import CsvReader
 from preprocess.example_reader import ExampleReader
 
@@ -18,7 +19,7 @@ class BaseModel:
         # some basic parameters of the model
         self.model = None
         self.word_max_len = 43
-        self.char_max_len = 57
+        self.char_max_len = 54
         self.num_words = 9647
         self.num_chars = 2307
         self.args = args
@@ -47,17 +48,18 @@ class BaseModel:
         if self.args.need_char_level:
             inputs += [self.Q1_char, self.Q2_char]
         self.model = Model(inputs=inputs, outputs=self.output)
-        self.model.compile(optimizer=self.args.optimizer, loss=self.args.loss, metrics=['acc'])
+        optimizer = get({'class_name': self.args.optimizer, 'config': {'lr': self.args.lr}})
+        self.model.compile(optimizer=optimizer, loss=self.args.loss, metrics=['acc'])
 
     def one_train(self, epochs, batch_size,
                   train_data, train_label,
                   dev_data, dev_label):
         self.compile_model()
         for e in range(epochs):
-            self.model.fit(train_data, train_label, batch_size=batch_size, verbose=0,
+            self.model.fit(train_data, train_label, batch_size=batch_size, verbose=1,
                            validation_data=(dev_data, dev_label))
-            dev_out = self.model.predict(dev_data, batch_size=2 * batch_size, verbose=0)
-            metrics = PRF(dev_label.argmax(axis=1), dev_out.argmax(axis=1))
+            dev_out = self.model.predict(dev_data, batch_size=2 * batch_size, verbose=1)
+            metrics = PRF(dev_label, dev_out)
             metrics['epoch'] = e + 1
             print_metrics(metrics, metrics_type='dev')
 
@@ -85,7 +87,8 @@ class BaseModel:
                            dev_data[:-1], dev_data[-1])
 
     def predict(self):
-        results = self.model.predict([self.test_word_inputs1, self.test_word_inputs2], batch_size=128, verbose=0)
+        results = self.model.predict([self.test_word_inputs1, self.test_word_inputs2],
+                                     batch_size=128, verbose=1)
         res = results.argmax(axis=1)
 
     def save_model(self, file=""):
@@ -147,14 +150,14 @@ class BaseModel:
 
     def embedded(self):
         shape = self.embedding_matrix.shape
-        word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=self.embedding_matrix)
+        word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=[self.embedding_matrix])
         Q1_emb = word_embedding(self.Q1)
         Q2_emb = word_embedding(self.Q2)
         embedded = [Q1_emb, Q2_emb]
 
         if self.args.need_char_level:
             shape = self.char_embedding_matrix.shape
-            char_embedding = Embedding(*shape, mask_zero=True, weights=self.char_embedding_matrix)
+            char_embedding = Embedding(*shape, mask_zero=True, weights=[self.char_embedding_matrix])
             Q1_char_emb = char_embedding(self.Q1_char)
             Q2_char_emb = char_embedding(self.Q2_char)
             embedded += [Q1_char_emb, Q2_char_emb]

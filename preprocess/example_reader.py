@@ -8,10 +8,10 @@ from preprocess.csv_reader import CsvReader
 class ExampleReader:
 
     def __init__(self):
-        self.dir = "../resource/"
+        self.dir = "./resource/"
 
     def get_embedding_matrix(self, name=""):
-        embedding_matrix_file = self.dir + name
+        embedding_matrix_file = name
         embedding_matrix = []
         rf = open(embedding_matrix_file, 'r')
         while True:

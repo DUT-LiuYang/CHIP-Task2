@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--dropout', type=float, default=0.2)
     parser.add_argument('--optimizer', type=str, default='RMSprop')
-    parser.add_argument('--loss', type=str, default='categorical_crossentropy')
+    parser.add_argument('--loss', type=str, default='binary_crossentropy')
 
     parser.add_argument('--need_char_level', type=bool, default=True)
 

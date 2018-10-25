@@ -3,7 +3,7 @@ import os
 
 
 def PRF(label: np.ndarray, predict: np.ndarray):
-    categories_num = label.max() + 1
+    categories_num = 2
     matrix = np.zeros((categories_num, categories_num), dtype=np.int32)
 
     label_array = [(label == i).astype(np.int32) for i in range(categories_num)]

@@ -30,7 +30,7 @@ class Toymodel(BaseModel):
         result = Dropout(0.2)(result)
         result = Dense(512, activation='tanh')(result)
         result = Dense(256, activation='tanh')(result)
-        predictions = Dense(2, activation='softmax')(result)
+        predictions = Dense(1, activation='sigmoid')(result)
         # model = Model(inputs=[word_input_1, word_input_2], outputs=predictions)
         # model.summary()
         # model.compile(loss=['binary_crossentropy'],optimizer='Adam', metrics=['accuracy'])
