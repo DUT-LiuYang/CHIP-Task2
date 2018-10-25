@@ -37,7 +37,7 @@ class Toymodel(BaseModel):
 
         return predictions
 
-
+#从basemodel里添加了字符级进行测试
 if __name__ == '__main__':
     testmodel=Toymodel()
 
