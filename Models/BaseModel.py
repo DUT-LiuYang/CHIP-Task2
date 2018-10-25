@@ -8,25 +8,32 @@ from preprocess.example_reader import ExampleReader
 
 class BaseModel:
 
-    def __init__(self):
+    def __init__(self, char_level=False):
 
         # used dirs
         self.save_dir = "../saved_models/"
-        self.embedding_dir = "../instances/word_embed.txt"
+        self.word_embedding_dir = "../instances/word_embed.txt"
+        self.char_embedding_dir = "../instances/char_embed.txt"
 
         # some basic parameters of the model
         self.model = None
-        self.max_len = 43
+        self.word_max_len = 43
+        self.char_max_len = 57
         self.num_words = 9647
+        self.num_chars = 2307
+        self.char_level = char_level
 
         # pre-trained embeddings and their parameters.
-
         self.embedding_matrix = None
+        self.char_embedding_matrix = None
         self.embedding_trainable = False
         self.EMBEDDING_DIM = 300
 
-        self.train_question_inputs1, self.train_question_inputs2, self.train_label = None, None, None
-        self.test_question_inputs1, self.test_question_inputs2 = None, None
+        self.train_word_inputs1, self.train_word_inputs2, self.train_label = None, None, None
+        self.test_word_inputs1, self.test_word_inputs2 = None, None
+        if char_level:
+            self.train_char_inputs1, self.train_char_inputs2 = None, None
+            self.test_char_inputs1, self.test_char_inputs2 = None, None
         self.load_data()
 
         self.Q1, self.Q2 = self.make_input()
@@ -70,9 +77,8 @@ class BaseModel:
                            [train_data0, train_data1], train_label,
                            [dev_data0, dev_data1], dev_label)
 
-
     def predict(self):
-        results = self.model.predict([self.test_question_inputs1, self.test_question_inputs2], batch_size=128, verbose=0)
+        results = self.model.predict([self.test_word_inputs1, self.test_word_inputs2], batch_size=128, verbose=0)
         res = results.argmax(axis=1)
 
     def save_model(self, file=""):
@@ -81,7 +87,7 @@ class BaseModel:
     def load_data(self):
         csv_reader = CsvReader()
         print("read data from train.csv...")
-        train_data, train_label = csv_reader.read_csv(name="train.csv", train=True)
+        train_data, self.train_label = csv_reader.read_csv(name="train.csv", train=True)
 
         print("\nread data from test.csv...")
         test_data, _ = csv_reader.read_csv(name="test.csv", train=False)
@@ -89,26 +95,39 @@ class BaseModel:
         print("\nget word ids - index dic...")
         embedding_file = "word_embedding.txt"
         new_embedding_file = "../instances/word_embed.txt"
-        id_index,index = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)
+        word_id_index, word_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 9647
 
-        print("\nread question and convert the word id to index using word ids - index dic...")
-        id_question = csv_reader.read_questions(name="question_id.csv", word_id_index=id_index)
+        print("\nget char ids - index dic...")
+        embedding_file = "char_embedding.txt"
+        new_embedding_file = "../instances/char_embed.txt"
+        char_id_index, char_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
+
+        print("\nread question and convert the word id and char id to index using word/char ids - index dic...")
+        id_question_words, id_question_chars = csv_reader.read_questions(name="question_id.csv",
+                                                                         word_id_index=word_id_index,
+                                                                         char_id_index=char_id_index,
+                                                                         word_unk=word_unk,
+                                                                         char_unk=char_unk)
 
         er = ExampleReader()
-        self.embedding_matrix = er.get_embedding_matrix("../instances/word_embed.txt")
-        self.train_question_inputs1, self.train_question_inputs2 = er.question_pairs2question_inputs(inputs=train_data,
-                                                                                                     id_questions=id_question)
-        self.train_label = train_label
-        self.test_question_inputs1, self.test_question_inputs2 = er.question_pairs2question_inputs(inputs=test_data,
-                                                                                                   id_questions=id_question)
+        self.embedding_matrix = er.get_embedding_matrix(self.word_embedding_dir)
+
+        self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)
+        self.test_word_inputs1, self.test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words)
+
+        if self.char_level:
+            self.char_embedding_matrix = er.get_embedding_matrix(self.char_embedding_dir)
+            self.train_char_inputs1, self.train_char_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_chars)
+            self.test_char_inputs1, self.test_char_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_chars)
 
     def read_model(self, file=""):
         self.build_model()
         self.model.load_weights(self.save_dir + file)
 
     def make_input(self):
-        Q1 = Input(shape=[self.max_len], dtype='int32')
-        Q2 = Input(shape=[self.max_len], dtype='int32')
+        # you can override this function depending on whether to use char level clues.
+        Q1 = Input(shape=[self.word_max_len], dtype='int32')
+        Q2 = Input(shape=[self.word_max_len], dtype='int32')
         return Q1, Q2
 
 
