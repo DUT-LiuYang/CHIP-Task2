@@ -36,6 +36,7 @@ class BaseModel:
         self.load_data()
 
         self.Q1, self.Q2, self.Q1_char, self.Q2_char = self.make_input()
+        self.embedded()
         self.output = self.build_model()  # (B, 2)
 
     def build_model(self):
@@ -61,27 +62,27 @@ class BaseModel:
             print_metrics(metrics, metrics_type='dev')
 
     def train_model(self, epochs, batch_size, kfold_num=0):
+        inputs = [self.train_word_inputs1, self.train_word_inputs2,
+                  self.train_char_inputs1, self.train_char_inputs2]
         if kfold_num > 1:
             kfold = StratifiedKFold(n_splits=kfold_num, shuffle=True)
             for train_index, dev_index in kfold.split(self.train_word_inputs1, self.train_label):
-                train_data = self.train_word_inputs1[train_index], self.train_word_inputs2[train_index]
+                train_data = [data[train_index] for data in inputs if data is not None]
                 train_label = self.train_label[train_index]
-                dev_data = self.train_word_inputs1[dev_index], self.train_word_inputs2[dev_index]
+                dev_data = [data[dev_index] for data in inputs if data is not None]
                 dev_label = self.train_label[dev_index]
 
                 self.one_train(epochs, batch_size,
                                train_data, train_label, dev_data, dev_label)
 
         else:
-            train_data0, train_data1, \
-            dev_data0, dev_data1, \
-            train_label, dev_label = train_test_split([self.train_word_inputs1, self.train_word_inputs2,
-                                                       self.train_label],
-                                                      test_size=0.2,
-                                                      random_state=1)
+            inputs.append(self.train_label)
+            all_data = train_test_split(*inputs, test_size=0.2, random_state=1)
+            train_data = [all_data[2*i] for i in range(len(inputs))]
+            dev_data = [all_data[2*i + 1] for i in range(len(inputs))]
             self.one_train(epochs, batch_size,
-                           [train_data0, train_data1], train_label,
-                           [dev_data0, dev_data1], dev_label)
+                           train_data[:-1], train_data[-1],
+                           dev_data[:-1], dev_data[-1])
 
     def predict(self):
         results = self.model.predict([self.test_word_inputs1, self.test_word_inputs2], batch_size=128, verbose=0)
@@ -144,6 +145,27 @@ class BaseModel:
             inputs += [None, None]
         return inputs
 
+    def embedded(self):
+        shape = self.embedding_matrix.shape
+        word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=self.embedding_matrix)
+        Q1_emb = word_embedding(self.Q1)
+        Q2_emb = word_embedding(self.Q2)
+        if self.args.need_char_level:
+            shape = self.char_embedding_matrix.shape
+            char_embedding = Embedding(*shape, mask_zero=True, weights=self.char_embedding_matrix)
+            Q1_char_emb = char_embedding(self.Q1_char)
+            Q2_char_emb = char_embedding(self.Q2_char)
+            Q1_char_emb, Q1_char_emb = self.transfom_char(Q1_char_emb, Q2_char_emb)
+        return Q1_emb, Q2_emb
 
+
+
+    def transfom_char(self, Q1_char_emb, Q2_char_emb):
+        return None, None
+
+
+if __name__ == '__main__':
+    args = {'need_char_level': True}
+    BaseModel(args).train_model(1, 10, 0)
 
 
