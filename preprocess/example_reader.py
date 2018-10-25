@@ -71,20 +71,32 @@ if __name__ == '__main__':
     print("\nget word ids - index dic...")
     embedding_file = "word_embedding.txt"
     new_embedding_file = "../instances/word_embed.txt"
-    id_index, index = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)
+    word_id_index, word_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
 
-    print("\nread question and convert the word id to index using word ids - index dic...")
-    id_question = csv_reader.read_questions(name="question_id.csv", word_id_index=id_index)
+    print("\nget char ids - index dic...")
+    embedding_file = "char_embedding.txt"
+    new_embedding_file = "../instances/char_embed.txt"
+    char_id_index, char_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
+
+    print("\nread question and convert the word id and char id to index using word/char ids - index dic...")
+    id_question_words, id_question_chars = csv_reader.read_questions(name="question_id.csv",
+                                                                     word_id_index=word_id_index,
+                                                                     char_id_index=char_id_index,
+                                                                     word_unk=word_unk,
+                                                                     char_unk=char_unk)
 
     print(train_data[0])
     print(test_data[0])
 
     er = ExampleReader()
-    train_question_inputs1, train_question_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question)
-    test_question_inputs1, test_question_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question)
+    train_word_inputs1, train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)
+    test_word_inputs1, test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words)
+
+    train_char_inputs1, train_char_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_chars)
+    test_char_inputs1, test_char_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_chars)
 
     skf = StratifiedKFold(n_splits=5)
-    inputs = np.stack([train_question_inputs1, train_question_inputs2], axis=1)
+    inputs = np.stack([train_word_inputs1, train_word_inputs2], axis=1)
     skf.get_n_splits(inputs, train_label)
     for train_index, test_index in skf.split(inputs, train_label):
         X_train, X_test = inputs[train_index], inputs[test_index]
@@ -92,14 +104,3 @@ if __name__ == '__main__':
         print(str(np.shape(X_train)))
         print(str(np.shape(y_train)))
         print(str(np.shape(X_test)))
-
-    # print(str(np.shape(train_question_inputs1)))
-    # print(str(np.shape(train_question_inputs2)))
-    # print(str(np.shape(test_question_inputs1)))
-    # print(str(np.shape(test_question_inputs2)))
-    #
-    # indicator_matrix = er.get_Indicator_matrix(train_question_inputs1, train_question_inputs2, 39)
-    # print(str(train_question_inputs1[0]))
-    # print(str(train_question_inputs2[0]))
-    # print(str(indicator_matrix[0][0]))
-
