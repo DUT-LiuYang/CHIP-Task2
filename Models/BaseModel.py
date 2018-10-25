@@ -56,9 +56,10 @@ class BaseModel:
                   dev_data, dev_label):
         self.compile_model()
         for e in range(epochs):
-            self.model.fit(train_data, train_label, batch_size=batch_size, verbose=1,
-                           validation_data=(dev_data, dev_label))
+            # self.model.fit(train_data, train_label, batch_size=batch_size, verbose=1,
+            #                validation_data=(dev_data, dev_label))
             dev_out = self.model.predict(dev_data, batch_size=2 * batch_size, verbose=1)
+            print(dev_label.shape, dev_out.shape)
             metrics = PRF(dev_label, dev_out)
             metrics['epoch'] = e + 1
             print_metrics(metrics, metrics_type='dev')
@@ -95,7 +96,8 @@ class BaseModel:
         self.model.save_weights(self.save_dir + file)
 
     def load_data(self):
-        csv_reader = CsvReader()
+        r_dir = self.args.r_dir
+        csv_reader = CsvReader(r_dir)
         print("read data from train.csv...")
         train_data, self.train_label = csv_reader.read_csv(name="train.csv", train=True)
 
@@ -119,7 +121,7 @@ class BaseModel:
                                                                          word_unk=word_unk,
                                                                          char_unk=char_unk)
 
-        er = ExampleReader()
+        er = ExampleReader(r_dir)
         self.embedding_matrix = er.get_embedding_matrix(self.word_embedding_dir)
 
         self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)

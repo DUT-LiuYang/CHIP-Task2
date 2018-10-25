@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument('--save_dir', default="./saved_models/")
     parser.add_argument('--word_emb_dir', default="./instances/word_embed.txt")
     parser.add_argument('--char_emb_dir', default="./instances/char_embed.txt")
+    parser.add_argument('--r_dir', default='./resource/')
 
     return parser.parse_args()
 

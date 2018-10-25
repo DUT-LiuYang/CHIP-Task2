@@ -4,8 +4,8 @@ import numpy as np
 
 class CsvReader:
 
-    def __init__(self):
-        self.dir = "./resource/"
+    def __init__(self, r_dir):
+        self.dir = r_dir
 
     def read_csv(self, name="", train=False):
         data = []

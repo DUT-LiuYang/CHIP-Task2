@@ -7,8 +7,8 @@ from preprocess.csv_reader import CsvReader
 
 class ExampleReader:
 
-    def __init__(self):
-        self.dir = "./resource/"
+    def __init__(self, r_dir):
+        self.dir = r_dir
 
     def get_embedding_matrix(self, name=""):
         embedding_matrix_file = name
