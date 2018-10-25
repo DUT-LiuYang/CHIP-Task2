@@ -124,7 +124,7 @@ if __name__ == '__main__':
     print("\nget word ids - index dic...")
     embedding_file = "word_embedding.txt"
     new_embedding_file = "../instances/word_embed.txt"
-    word_id_index, word_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
+    word_id_index, word_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 9647
 
     print("\nget char ids - index dic...")
     embedding_file = "char_embedding.txt"
