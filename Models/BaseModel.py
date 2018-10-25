@@ -11,9 +11,9 @@ class BaseModel:
     def __init__(self, args):
 
         # used dirs
-        self.save_dir = "../saved_models/"
-        self.word_embedding_dir = "../instances/word_embed.txt"
-        self.char_embedding_dir = "../instances/char_embed.txt"
+        self.save_dir = args.save_dir
+        self.word_embedding_dir = args.word_emb_dir
+        self.char_embedding_dir = args.char_emb_dir
 
         # some basic parameters of the model
         self.model = None
@@ -101,12 +101,12 @@ class BaseModel:
 
         print("\nget word ids - index dic...")
         embedding_file = "word_embedding.txt"
-        new_embedding_file = "../instances/word_embed.txt"
+        new_embedding_file = self.args.word_emb_dir
         word_id_index, word_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 9647
 
         print("\nget char ids - index dic...")
         embedding_file = "char_embedding.txt"
-        new_embedding_file = "../instances/char_embed.txt"
+        new_embedding_file = self.args.char_emb_dir
         char_id_index, char_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
 
         print("\nread question and convert the word id and char id to index using word/char ids - index dic...")
