@@ -132,9 +132,9 @@ if __name__ == '__main__':
     char_id_index, char_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
 
     print("\nread question and convert the word id and char id to index using word/char ids - index dic...")
-    id_question = csv_reader.read_questions(name="question_id.csv",
-                                            word_id_index=word_id_index,
-                                            char_id_index=char_id_index,
-                                            word_unk=word_unk,
-                                            char_unk=char_unk)
+    id_question_words, id_question_chars = csv_reader.read_questions(name="question_id.csv",
+                                                                     word_id_index=word_id_index,
+                                                                     char_id_index=char_id_index,
+                                                                     word_unk=word_unk,
+                                                                     char_unk=char_unk)
 
