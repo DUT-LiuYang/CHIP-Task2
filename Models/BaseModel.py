@@ -87,12 +87,12 @@ class BaseModel:
         test_data, _ = csv_reader.read_csv(name="test.csv", train=False)
 
         print("\nget word ids - index dic...")
-        embedding_file = "word_embed.txt"
+        embedding_file = "word_embedding.txt"
         new_embedding_file = "../instances/word_embed.txt"
-        id_index = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)
+        id_index,index = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)
 
         print("\nread question and convert the word id to index using word ids - index dic...")
-        id_question = csv_reader.read_questions(name="question.csv", word_id_index=id_index)
+        id_question = csv_reader.read_questions(name="question_id.csv", word_id_index=id_index)
 
         er = ExampleReader()
         self.embedding_matrix = er.get_embedding_matrix("../instances/word_embed.txt")
