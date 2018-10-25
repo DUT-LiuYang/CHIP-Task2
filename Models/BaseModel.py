@@ -158,6 +158,8 @@ class BaseModel:
             Q1_char_emb = char_embedding(self.Q1_char)
             Q2_char_emb = char_embedding(self.Q2_char)
             embedded += [Q1_char_emb, Q2_char_emb]
+        else:
+            embedded += [None, None]
 
         return embedded
 
