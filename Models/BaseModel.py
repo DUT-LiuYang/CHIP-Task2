@@ -56,11 +56,10 @@ class BaseModel:
                   dev_data, dev_label):
         self.compile_model()
         for e in range(epochs):
-            # self.model.fit(train_data, train_label, batch_size=batch_size, verbose=1,
-            #                validation_data=(dev_data, dev_label))
+            self.model.fit(train_data, train_label, batch_size=batch_size, verbose=1,
+                           validation_data=(dev_data, dev_label))
             dev_out = self.model.predict(dev_data, batch_size=2 * batch_size, verbose=1)
-            print(dev_label.shape, dev_out.shape)
-            metrics = PRF(dev_label, dev_out)
+            metrics = PRF(dev_label, (dev_out > 0.5).astype('int32').reshape([-1]))
             metrics['epoch'] = e + 1
             print_metrics(metrics, metrics_type='dev')
 

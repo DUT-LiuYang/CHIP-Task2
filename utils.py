@@ -5,12 +5,8 @@ import os
 def PRF(label: np.ndarray, predict: np.ndarray):
     categories_num = 2
     matrix = np.zeros((categories_num, categories_num), dtype=np.int32)
-    print(label.shape)
-    print(label)
-    print(label.reshape([-1, 1]) == 0)
     label_array = [(label == i).astype(np.int32) for i in range(categories_num)]
     predict_array = [(predict == i).astype(np.int32) for i in range(categories_num)]
-
     for i in range(categories_num):
         for j in range(categories_num):
             matrix[i, j] = label_array[i][predict_array[j] == 1].sum()
