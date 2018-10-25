@@ -25,7 +25,7 @@ def parse_args():
 
 
 def run(args):
-    model = model_dict[args.model](args.need_char_level)
+    model = model_dict[args.model](args)
     if args.mode == 'train':
         model.train_model(args.epochs, args.batch_size, args.kfold)
     else:
