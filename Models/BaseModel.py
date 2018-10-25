@@ -36,7 +36,7 @@ class BaseModel:
         self.load_data()
 
         self.Q1, self.Q2, self.Q1_char, self.Q2_char = self.make_input()
-        self.embedded()
+        self.Q1_emb, self.Q2_emb, self.Q1_char_emb, self.Q2_char_emb = self.embedded()
         self.output = self.build_model()  # (B, 2)
 
     def build_model(self):
@@ -138,8 +138,8 @@ class BaseModel:
         inputs = [Q1, Q2]
 
         if self.args.need_char_level:
-            Q1_char = Input(shape=[self.word_max_len, self.char_max_len], dtype='int32')
-            Q2_char = Input(shape=[self.word_max_len, self.char_max_len], dtype='int32')
+            Q1_char = Input(shape=[self.char_max_len], dtype='int32')
+            Q2_char = Input(shape=[self.char_max_len], dtype='int32')
             inputs += [Q1_char, Q2_char]
         else:
             inputs += [None, None]
@@ -150,18 +150,16 @@ class BaseModel:
         word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=self.embedding_matrix)
         Q1_emb = word_embedding(self.Q1)
         Q2_emb = word_embedding(self.Q2)
+        embedded = [Q1_emb, Q2_emb]
+
         if self.args.need_char_level:
             shape = self.char_embedding_matrix.shape
             char_embedding = Embedding(*shape, mask_zero=True, weights=self.char_embedding_matrix)
             Q1_char_emb = char_embedding(self.Q1_char)
             Q2_char_emb = char_embedding(self.Q2_char)
-            Q1_char_emb, Q1_char_emb = self.transfom_char(Q1_char_emb, Q2_char_emb)
-        return Q1_emb, Q2_emb
+            embedded += [Q1_char_emb, Q2_char_emb]
 
-
-
-    def transfom_char(self, Q1_char_emb, Q2_char_emb):
-        return None, None
+        return embedded
 
 
 if __name__ == '__main__':
