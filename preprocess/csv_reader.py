@@ -34,33 +34,46 @@ class CsvReader:
 
         return data, np.array(label)
 
-    def read_questions(self, name="", word_id_index={}, index=9648):
-        id_question = {}
+    def read_questions(self, name="", word_id_index={}, char_id_index={}, word_unk=9648, char_unk=100):
+        id_question_words = {}
+        id_question_chars = {}
 
         csv_reader = csv.reader(open(self.dir + name, encoding='utf-8'))
         count = 0
-        max_len = -1
+        word_max_len = -1
+        char_max_len = -1
 
         for num, row in enumerate(csv_reader):
             if num == 0:
                 continue
 
-            id_question[row[0]] = []
+            id_question_words[row[0]] = []
             for x in row[1].split(" "):
                 if x in word_id_index.keys():
-                    id_question[row[0]].append(int(word_id_index[x]))
+                    id_question_words[row[0]].append(int(word_id_index[x]))
                 else:
-                    id_question[row[0]].append(index)
+                    id_question_words[row[0]].append(word_unk)
 
-            if max_len < len(row[1].split(" ")):
-                max_len = len(row[1].split(" "))
+            if word_max_len < len(row[1].split(" ")):
+                word_max_len = len(row[1].split(" "))
+
+            id_question_chars[row[0]] = []
+            for x in row[2].split(" "):
+                if x in char_id_index.keys():
+                    id_question_chars[row[0]].append(int(char_id_index[x]))
+                else:
+                    id_question_chars[row[0]].append(char_unk)
+
+            if char_max_len < len(row[2].split(" ")):
+                char_max_len = len(row[2].split(" "))
 
             count += 1
 
         print("There are " + str(count) + " questions.")  # 35268
-        print(str(max_len))  # 43
+        print("Max word length is " + str(word_max_len))  # 43
+        print("Max char length is " + str(char_max_len))  # 57
 
-        return id_question
+        return id_question_words, id_question_chars
 
     def get_ids_from_embeddings(self, embedding_file="", new_embedding_file=""):
         embedding_file = self.dir + embedding_file
@@ -111,8 +124,17 @@ if __name__ == '__main__':
     print("\nget word ids - index dic...")
     embedding_file = "word_embedding.txt"
     new_embedding_file = "../instances/word_embed.txt"
-    id_index, index = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)
+    word_id_index, word_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
 
-    print("\nread question and convert the word id to index using word ids - index dic...")
-    id_question = csv_reader.read_questions(name="question_id.csv", word_id_index=id_index)
+    print("\nget char ids - index dic...")
+    embedding_file = "char_embedding.txt"
+    new_embedding_file = "../instances/char_embed.txt"
+    char_id_index, char_unk = csv_reader.get_ids_from_embeddings(embedding_file, new_embedding_file)  # 2307
+
+    print("\nread question and convert the word id and char id to index using word/char ids - index dic...")
+    id_question = csv_reader.read_questions(name="question_id.csv",
+                                            word_id_index=word_id_index,
+                                            char_id_index=char_id_index,
+                                            word_unk=word_unk,
+                                            char_unk=char_unk)
 
