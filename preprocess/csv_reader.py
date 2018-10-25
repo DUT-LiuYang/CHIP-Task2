@@ -21,7 +21,7 @@ class CsvReader:
             for index, value in enumerate(row):
                 if train:
                     if index == 2:
-                        label.append(value)
+                        label.append(int(value))
                     else:
                         temp.append(value)
                 else:
