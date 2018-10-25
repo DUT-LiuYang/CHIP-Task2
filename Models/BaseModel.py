@@ -8,7 +8,7 @@ from preprocess.example_reader import ExampleReader
 
 class BaseModel:
 
-    def __init__(self, char_level=False):
+    def __init__(self, args):
 
         # used dirs
         self.save_dir = "../saved_models/"
@@ -21,7 +21,7 @@ class BaseModel:
         self.char_max_len = 57
         self.num_words = 9647
         self.num_chars = 2307
-        self.char_level = char_level
+        self.args = args
 
         # pre-trained embeddings and their parameters.
         self.embedding_matrix = None
@@ -31,21 +31,27 @@ class BaseModel:
 
         self.train_word_inputs1, self.train_word_inputs2, self.train_label = None, None, None
         self.test_word_inputs1, self.test_word_inputs2 = None, None
-        if char_level:
-            self.train_char_inputs1, self.train_char_inputs2 = None, None
-            self.test_char_inputs1, self.test_char_inputs2 = None, None
+        self.train_char_inputs1, self.train_char_inputs2 = None, None
+        self.test_char_inputs1, self.test_char_inputs2 = None, None
         self.load_data()
 
-        self.Q1, self.Q2 = self.make_input()
-        self.output = self.build_model()
-        self.model = Model(inputs=[self.Q1, self.Q2], outputs=self.output)
+        self.Q1, self.Q2, self.Q1_char, self.Q2_char = self.make_input()
+        self.output = self.build_model()  # (B, 2)
 
     def build_model(self):
         raise NotImplementedError
 
+    def compile_model(self):
+        inputs = [self.Q1, self.Q2]
+        if self.args.need_char_level:
+            inputs += [self.Q1_char, self.Q2_char]
+        self.model = Model(inputs=inputs, outputs=self.output)
+        self.model.compile(optimizer=self.args.optimizer, loss=self.args.loss, metrics=['acc'])
+
     def one_train(self, epochs, batch_size,
                   train_data, train_label,
                   dev_data, dev_label):
+        self.compile_model()
         for e in range(epochs):
             self.model.fit(train_data, train_label, batch_size=batch_size, verbose=0,
                            validation_data=(dev_data, dev_label))
@@ -57,10 +63,10 @@ class BaseModel:
     def train_model(self, epochs, batch_size, kfold_num=0):
         if kfold_num > 1:
             kfold = StratifiedKFold(n_splits=kfold_num, shuffle=True)
-            for train_index, dev_index in kfold.split(self.train_question_inputs1, self.train_label):
-                train_data = self.train_question_inputs1[train_index], self.train_question_inputs2[train_index]
+            for train_index, dev_index in kfold.split(self.train_word_inputs1, self.train_label):
+                train_data = self.train_word_inputs1[train_index], self.train_word_inputs2[train_index]
                 train_label = self.train_label[train_index]
-                dev_data = self.train_question_inputs1[dev_index], self.train_question_inputs2[dev_index]
+                dev_data = self.train_word_inputs1[dev_index], self.train_word_inputs2[dev_index]
                 dev_label = self.train_label[dev_index]
 
                 self.one_train(epochs, batch_size,
@@ -69,7 +75,7 @@ class BaseModel:
         else:
             train_data0, train_data1, \
             dev_data0, dev_data1, \
-            train_label, dev_label = train_test_split([self.train_question_inputs1, self.train_question_inputs2,
+            train_label, dev_label = train_test_split([self.train_word_inputs1, self.train_word_inputs2,
                                                        self.train_label],
                                                       test_size=0.2,
                                                       random_state=1)
@@ -115,20 +121,28 @@ class BaseModel:
         self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)
         self.test_word_inputs1, self.test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words)
 
-        if self.char_level:
+        if self.args.need_char_level:
             self.char_embedding_matrix = er.get_embedding_matrix(self.char_embedding_dir)
             self.train_char_inputs1, self.train_char_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_chars)
             self.test_char_inputs1, self.test_char_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_chars)
 
     def read_model(self, file=""):
-        self.build_model()
+        self.compile_model()
         self.model.load_weights(self.save_dir + file)
 
     def make_input(self):
         # you can override this function depending on whether to use char level clues.
         Q1 = Input(shape=[self.word_max_len], dtype='int32')
         Q2 = Input(shape=[self.word_max_len], dtype='int32')
-        return Q1, Q2
+        inputs = [Q1, Q2]
+
+        if self.args.need_char_level:
+            Q1_char = Input(shape=[self.word_max_len, self.char_max_len], dtype='int32')
+            Q2_char = Input(shape=[self.word_max_len, self.char_max_len], dtype='int32')
+            inputs += [Q1_char, Q2_char]
+        else:
+            inputs += [None, None]
+        return inputs
 
 
 
