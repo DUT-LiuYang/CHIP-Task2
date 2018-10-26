@@ -28,6 +28,7 @@ class LiuModel1(BaseModel):
         args.loss = 'binary_crossentropy'
         args.need_char_level = False
         args.need_word_level = True
+        args.word_trainable = False
         args.lr = 0.001
 
         args.save_dir = "../saved_models/"
@@ -38,17 +39,13 @@ class LiuModel1(BaseModel):
         super(LiuModel1, self).__init__(args)
 
     def build_model(self):
-        encoding_layer1 = Bidirectional(GRU(256,
-                                            # activation='relu',
-                                            # recurrent_dropout=0.2,
+        encoding_layer1 = Bidirectional(GRU(300,
                                             return_sequences=True,
                                             dropout=0.2))
-        encoded_sentence_1 = encoding_layer1(self.Q1_emb)  # (?, len, 512)
-        encoded_sentence_2 = encoding_layer1(self.Q2_emb)  # (?, len, 512)
+        encoded_sentence_1 = encoding_layer1(self.Q1_emb)  # (?, len, 600)
+        encoded_sentence_2 = encoding_layer1(self.Q2_emb)  # (?, len, 600)
 
-        encoding_layer2 = Bidirectional(GRU(256,
-                                            # activation='relu',    # tanh is better than relu
-                                            # recurrent_dropout=0.2,  # rd ?
+        encoding_layer2 = Bidirectional(GRU(300,
                                             return_sequences=False,
                                             dropout=0.2))
 
@@ -60,8 +57,7 @@ class LiuModel1(BaseModel):
                     output_shape=no_change)([encoded_sentence_1, encoded_sentence_2])
 
         x = keras.layers.concatenate([encoded_sentence_1, encoded_sentence_2, x1, x2])
-        x = Dense(512, activation='elu')(x)
-        x = BatchNormalization()(x)     # bn ?
+        x = Dense(600, activation='elu')(x)
         x = Dropout(rate=0.5)(x)
         predictions = Dense(1, activation='sigmoid')(x)
 
@@ -85,4 +81,4 @@ class LiuModel1(BaseModel):
 
 if __name__ == '__main__':
     lm1 = LiuModel1()
-    lm1.train_model(epochs=50, batch_size=32, kfold_num=5)
+    lm1.train_model(epochs=50, batch_size=64, kfold_num=5)
