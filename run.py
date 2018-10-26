@@ -2,24 +2,26 @@
 import os
 import argparse
 from All_model import model_dict
+from config import Config
 
 
 def parse_args():
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", default='train',
+    parser.add_argument("--mode", default=Config.mode,
                         choices=['train', 'prepare', 'predict', 'evaluate'])
-    parser.add_argument("--model", type=str, default='Toymodel', help='class name of model')
+    parser.add_argument("--model", type=str, default=Config.model, help='class name of model')
 
-    parser.add_argument('--lr', type=float, default=0.001)
-    parser.add_argument('--dropout', type=float, default=0.2)
-    parser.add_argument('--optimizer', type=str, default='RMSprop')
-    parser.add_argument('--loss', type=str, default='binary_crossentropy')
+    parser.add_argument('--lr', type=float, default=Config.lr)
+    parser.add_argument('--dropout', type=float, default=Config.dropout)
+    parser.add_argument('--optimizer', type=str, default=Config.optimizer)
+    parser.add_argument('--loss', type=str, default=Config.loss)
 
-    parser.add_argument('--need_char_level', type=bool, default=True)
+    parser.add_argument('--need_char_level', type=bool, default=Config.need_char_level)
 
-    parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--kfold', type=int, default=0)
+    parser.add_argument('--batch_size', type=int, default=Config.batch_size)
+    parser.add_argument('--epochs', type=int, default=Config.epochs)
+    parser.add_argument('--kfold', type=int, default=Config.kfold)
 
     parser.add_argument('--save_dir', default="./saved_models/")
     parser.add_argument('--word_emb_dir', default="./instances/word_embed.txt")

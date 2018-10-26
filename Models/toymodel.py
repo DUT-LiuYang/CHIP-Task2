@@ -4,6 +4,7 @@ from Models.BaseModel import BaseModel
 from keras import Model
 from run import *
 
+
 class Toymodel(BaseModel):
     def __init__(self):
 
@@ -19,6 +20,7 @@ class Toymodel(BaseModel):
         args.r_dir = "../resource/"
         args.need_char_level=True
         super(Toymodel, self).__init__(args)
+
     def build_model(self):
 
 
@@ -84,8 +86,8 @@ class Toymodel(BaseModel):
         predictions = Dense(1, activation='sigmoid')(fin_res)
 
 
-        model = Model(inputs=[self.Q1, self.Q2,self.Q1_char,self.Q2_char], outputs=[predictions])
-        model.summary()
+        # model = Model(inputs=[self.Q1, self.Q2,self.Q1_char,self.Q2_char], outputs=[predictions])
+        # model.summary()
         # model.compile(loss=['binary_crossentropy'],optimizer='Adam', metrics=['accuracy'])
 
         return predictions

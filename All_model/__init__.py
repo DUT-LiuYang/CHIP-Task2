@@ -1,3 +1,3 @@
-from All_model.toymodel import Toymodel
+from Models.toymodel import Toymodel
 
 model_dict = globals()
