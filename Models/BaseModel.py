@@ -71,7 +71,7 @@ class BaseModel:
             metrics = PRF(dev_label, (dev_out > 0.5).astype('int32').reshape([-1]))
             metrics['epoch'] = e + 1
             metrics['val_loss'] = history.history['val_loss']
-            print_metrics(metrics, metrics_type=self.model.__class__.__name__ + self.args.selfname,
+            print_metrics(metrics, metrics_type=self.__class__.__name__ + self.args.selfname,
                           save_dir=self.args.log_dir)
 
     def train_model(self, epochs, batch_size, kfold_num=0):
