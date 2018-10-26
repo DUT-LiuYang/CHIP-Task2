@@ -36,17 +36,26 @@ class BaseModel:
         self.test_char_inputs1, self.test_char_inputs2 = None, None
         self.load_data()
 
-        self.Q1, self.Q2, self.Q1_char, self.Q2_char = self.make_input()
-        self.Q1_emb, self.Q2_emb, self.Q1_char_emb, self.Q2_char_emb = self.embedded()
-        self.output = self.build_model()  # (B, 2)
+        self.Q1, self.Q2, self.Q1_char, self.Q2_char = [None]*4
+        self.Q1_emb, self.Q2_emb, self.Q1_char_emb, self.Q2_char_emb = [None]*4
+        self.output = None  # (B, 2)
 
     def build_model(self):
         raise NotImplementedError
 
     def compile_model(self):
-        inputs = [self.Q1, self.Q2]
+
+        self.Q1, self.Q2, self.Q1_char, self.Q2_char = self.make_input()
+        self.Q1_emb, self.Q2_emb, self.Q1_char_emb, self.Q2_char_emb = self.embedded()
+        self.output = self.build_model()
+
+        if self.args.need_word_level:
+            inputs = [self.Q1, self.Q2]
+        else:
+            inputs = []
         if self.args.need_char_level:
             inputs += [self.Q1_char, self.Q2_char]
+
         self.model = Model(inputs=inputs, outputs=self.output)
         optimizer = get({'class_name': self.args.optimizer, 'config': {'lr': self.args.lr}})
         self.model.compile(optimizer=optimizer, loss=self.args.loss, metrics=['acc'])
@@ -62,7 +71,8 @@ class BaseModel:
             metrics = PRF(dev_label, (dev_out > 0.5).astype('int32').reshape([-1]))
             metrics['epoch'] = e + 1
             metrics['val_loss'] = history.history['val_loss']
-            print_metrics(metrics, metrics_type=self.model.__class__.__name__, save_dir='./logs')
+            print_metrics(metrics, metrics_type=self.model.__class__.__name__ + self.args.selfname,
+                          save_dir=self.args.log_dir)
 
     def train_model(self, epochs, batch_size, kfold_num=0):
         inputs = [self.train_word_inputs1, self.train_word_inputs2,
@@ -79,10 +89,13 @@ class BaseModel:
                                train_data, train_label, dev_data, dev_label)
 
         else:
+            inputs = [a for a in inputs if a is not None]
+            print([a.shape for a in inputs])
             inputs.append(self.train_label)
             all_data = train_test_split(*inputs, test_size=0.2, random_state=1)
             train_data = [all_data[2*i] for i in range(len(inputs))]
             dev_data = [all_data[2*i + 1] for i in range(len(inputs))]
+
             self.one_train(epochs, batch_size,
                            train_data[:-1], train_data[-1],
                            dev_data[:-1], dev_data[-1])
@@ -123,9 +136,9 @@ class BaseModel:
 
         er = ExampleReader(r_dir)
         self.embedding_matrix = er.get_embedding_matrix(self.word_embedding_dir)
-
-        self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)
-        self.test_word_inputs1, self.test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words)
+        if self.args.need_word_level:
+            self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)
+            self.test_word_inputs1, self.test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words)
 
         if self.args.need_char_level:
             self.char_embedding_matrix = er.get_embedding_matrix(self.char_embedding_dir)
@@ -138,9 +151,12 @@ class BaseModel:
 
     def make_input(self):
         # you can override this function depending on whether to use char level clues.
-        Q1 = Input(shape=[self.word_max_len], dtype='int32')
-        Q2 = Input(shape=[self.word_max_len], dtype='int32')
-        inputs = [Q1, Q2]
+        if self.args.need_word_level:
+            Q1 = Input(shape=[self.word_max_len], dtype='int32')
+            Q2 = Input(shape=[self.word_max_len], dtype='int32')
+            inputs = [Q1, Q2]
+        else:
+            inputs = [None, None]
 
         if self.args.need_char_level:
             Q1_char = Input(shape=[self.char_max_len], dtype='int32')
@@ -151,11 +167,14 @@ class BaseModel:
         return inputs
 
     def embedded(self):
-        shape = self.embedding_matrix.shape
-        word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=[self.embedding_matrix])
-        Q1_emb = word_embedding(self.Q1)
-        Q2_emb = word_embedding(self.Q2)
-        embedded = [Q1_emb, Q2_emb]
+        if self.args.need_word_level:
+            shape = self.embedding_matrix.shape
+            word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=[self.embedding_matrix])
+            Q1_emb = word_embedding(self.Q1)
+            Q2_emb = word_embedding(self.Q2)
+            embedded = [Q1_emb, Q2_emb]
+        else:
+            embedded = [None, None]
 
         if self.args.need_char_level:
             shape = self.char_embedding_matrix.shape

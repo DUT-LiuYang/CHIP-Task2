@@ -18,6 +18,7 @@ class Config:
     optimizer = 'RMSprop'
     loss = 'binary_crossentropy'
 
+    need_word_level = False
     need_char_level = True
 
     batch_size = 64

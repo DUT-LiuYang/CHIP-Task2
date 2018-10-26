@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument('--optimizer', type=str, default=Config.optimizer)
     parser.add_argument('--loss', type=str, default=Config.loss)
 
+    parser.add_argument('--need_word_level', type=bool, default=Config.need_word_level)
     parser.add_argument('--need_char_level', type=bool, default=Config.need_char_level)
 
     parser.add_argument('--batch_size', type=int, default=Config.batch_size)
@@ -27,6 +28,8 @@ def parse_args():
     parser.add_argument('--word_emb_dir', default="./instances/word_embed.txt")
     parser.add_argument('--char_emb_dir', default="./instances/char_embed.txt")
     parser.add_argument('--r_dir', default='./resource/')
+    parser.add_argument('--log_dir', default='./logs')
+    parser.add_argument('--selfname', default='zhou')
 
     return parser.parse_args()
 
