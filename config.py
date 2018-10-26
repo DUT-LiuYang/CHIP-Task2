@@ -1,6 +1,6 @@
 class Config:
     mode = 'train'          # choices=['train', 'prepare', 'predict', 'evaluate']
-    model = 'Toymodel'
+    model = 'IM'
 
     lr = 0.001
     dropout = 0.2
@@ -18,8 +18,10 @@ class Config:
     optimizer = 'RMSprop'
     loss = 'binary_crossentropy'
 
-    need_word_level = False
-    need_char_level = True
+    need_word_level = True
+    need_char_level = False
+    word_trainable = False
+    char_trainable = False
 
     batch_size = 64
     epochs = 50

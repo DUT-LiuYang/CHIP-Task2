@@ -169,7 +169,8 @@ class BaseModel:
     def embedded(self):
         if self.args.need_word_level:
             shape = self.embedding_matrix.shape
-            word_embedding = Embedding(shape[0], shape[1], mask_zero=True, weights=[self.embedding_matrix])
+            word_embedding = Embedding(shape[0], shape[1], mask_zero=True,
+                                       weights=[self.embedding_matrix], trainable=self.args.word_trainable)
             Q1_emb = word_embedding(self.Q1)
             Q2_emb = word_embedding(self.Q2)
             embedded = [Q1_emb, Q2_emb]
@@ -178,7 +179,8 @@ class BaseModel:
 
         if self.args.need_char_level:
             shape = self.char_embedding_matrix.shape
-            char_embedding = Embedding(*shape, mask_zero=True, weights=[self.char_embedding_matrix])
+            char_embedding = Embedding(*shape, mask_zero=True,
+                                       weights=[self.char_embedding_matrix], trainable=self.args.char_trainable)
             Q1_char_emb = char_embedding(self.Q1_char)
             Q2_char_emb = char_embedding(self.Q2_char)
             embedded += [Q1_char_emb, Q2_char_emb]

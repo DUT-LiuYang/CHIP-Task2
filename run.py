@@ -19,6 +19,8 @@ def parse_args():
 
     parser.add_argument('--need_word_level', type=bool, default=Config.need_word_level)
     parser.add_argument('--need_char_level', type=bool, default=Config.need_char_level)
+    parser.add_argument('--word_trainable', type=bool, default=Config.word_trainable)
+    parser.add_argument('--char_trainable', type=bool, default=Config.char_trainable)
 
     parser.add_argument('--batch_size', type=int, default=Config.batch_size)
     parser.add_argument('--epochs', type=int, default=Config.epochs)
