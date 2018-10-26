@@ -22,4 +22,4 @@ class Config:
 
     batch_size = 64
     epochs = 50
-    kfold =0
+    kfold = 0

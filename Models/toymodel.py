@@ -1,25 +1,23 @@
 from keras.layers import *
 from keras.layers import Dense, Bidirectional, GRU, Dropout, Lambda, BatchNormalization
 from Models.BaseModel import BaseModel
-from keras import Model
-from run import *
 
 
 class Toymodel(BaseModel):
-    def __init__(self):
-
-        args = parse_args()
-        args.optimizer = 'adam'
-        args.loss = 'binary_crossentropy'
-        args.need_char_level = False
-        args.lr = 0.01
-
-        args.save_dir = "../saved_models/"
-        args.word_emb_dir = "../instances/word_embed.txt"
-        args.char_emb_dir = "../instances/char_embed.txt"
-        args.r_dir = "../resource/"
-        args.need_char_level=True
-        super(Toymodel, self).__init__(args)
+    # def __init__(self):
+    #
+    #     args = parse_args()
+    #     args.optimizer = 'adam'
+    #     args.loss = 'binary_crossentropy'
+    #     args.need_char_level = False
+    #     args.lr = 0.01
+    #
+    #     args.save_dir = "../saved_models/"
+    #     args.word_emb_dir = "../instances/word_embed.txt"
+    #     args.char_emb_dir = "../instances/char_embed.txt"
+    #     args.r_dir = "../resource/"
+    #     args.need_char_level=True
+    #     super(Toymodel, self).__init__(args)
 
     def build_model(self):
 
@@ -94,6 +92,6 @@ class Toymodel(BaseModel):
 
 #从basemodel里添加了字符级进行测试
 if __name__ == '__main__':
-    testmodel=Toymodel()
+    testmodel=Toymodel({})
 
 

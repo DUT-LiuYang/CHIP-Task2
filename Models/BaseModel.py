@@ -62,7 +62,7 @@ class BaseModel:
             metrics = PRF(dev_label, (dev_out > 0.5).astype('int32').reshape([-1]))
             metrics['epoch'] = e + 1
             metrics['val_loss'] = history.history['val_loss']
-            print_metrics(metrics, metrics_type='dev')
+            print_metrics(metrics, metrics_type=self.model.name, save_dir='./logs')
 
     def train_model(self, epochs, batch_size, kfold_num=0):
         inputs = [self.train_word_inputs1, self.train_word_inputs2,

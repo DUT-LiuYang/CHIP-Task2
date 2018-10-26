@@ -51,8 +51,9 @@ def print_metrics(metrics, metrics_type, save_dir=None):
     each_prf = [[v * 100 for v in prf] for prf in zip(*metrics['each_prf'])]
     macro_prf = [v * 100 for v in metrics['macro_prf']]
     epoch = metrics['epoch']
+    loss = metrics['val_loss']
 
-    lines = ['------------  Epoch {0}  -----------'.format(epoch),
+    lines = ['------------  Epoch {0}, val_loss: {1}  -----------'.format(epoch, loss),
              'Confusion matrix:',
              '{0:>6}|{1:>6}|{2:>6}|<-- classified as'.format(' ', 'Good', 'Bad'),
              '------|-------------|{0:>6}'.format('-SUM-'),
