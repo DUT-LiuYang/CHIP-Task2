@@ -1,7 +1,6 @@
 from keras.layers import *
 from keras.layers import Dense, Bidirectional, GRU, Dropout, Lambda, BatchNormalization
 from Models.BaseModel import BaseModel
-from keras import Model
 from run import *
 
 

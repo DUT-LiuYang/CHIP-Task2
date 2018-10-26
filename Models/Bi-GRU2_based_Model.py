@@ -1,6 +1,6 @@
 import keras
 from keras.layers import Dense, Bidirectional, GRU, Dropout, Lambda, BatchNormalization
-from run import *
+from run import parse_args
 import argparse
 from Models.BaseModel import BaseModel
 
@@ -67,3 +67,4 @@ class LiuModel1(BaseModel):
 
 if __name__ == '__main__':
     lm1 = LiuModel1()
+    lm1.train_model(epochs=50, batch_size=32, kfold_num=5)
