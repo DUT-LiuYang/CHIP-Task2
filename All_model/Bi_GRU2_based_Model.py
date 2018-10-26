@@ -1,10 +1,8 @@
 import keras
-from keras.layers import Dense, Bidirectional, GRU, Dropout, Lambda, BatchNormalization
+from keras.layers import Dense, Bidirectional, GRU, Dropout, Lambda
 from run import parse_args
-import argparse
 from utils import PRF, print_metrics
 from Models.BaseModel import BaseModel
-from keras.optimizers import Adam
 
 
 def difference(x):
