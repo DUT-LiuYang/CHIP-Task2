@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import time
 
 
 def PRF(label: np.ndarray, predict: np.ndarray):
@@ -53,7 +54,12 @@ def print_metrics(metrics, metrics_type, save_dir=None):
     epoch = metrics['epoch']
     loss = metrics['val_loss']
 
-    lines = ['------------  Epoch {0}, val_loss: {1}  -----------'.format(epoch, loss),
+    lines = ['\n\n**********************************************************************************',
+             '*                                                                                *',
+             '*                           {}                              *'.format(time.strftime('%Y.%m.%d',time.localtime(time.time()))),
+             '*                                                                                *',
+             '**********************************************************************************\n',
+             '------------  Epoch {0}, val_loss: {1}  -----------'.format(epoch, loss),
              'Confusion matrix:',
              '{0:>6}|{1:>6}|{2:>6}|<-- classified as'.format(' ', 'Good', 'Bad'),
              '------|-------------|{0:>6}'.format('-SUM-'),
