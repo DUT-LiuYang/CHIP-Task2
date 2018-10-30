@@ -56,7 +56,8 @@ def print_metrics(metrics, metrics_type, save_dir=None):
 
     lines = ['\n\n**********************************************************************************',
              '*                                                                                *',
-             '*                           {}                              *'.format(time.strftime('%Y.%m.%d',time.localtime(time.time()))),
+             '*                           {}                                  *'.format(
+                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))),
              '*                                                                                *',
              '**********************************************************************************\n',
              '------------  Epoch {0}, val_loss: {1}  -----------'.format(epoch, loss),
