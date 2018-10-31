@@ -20,6 +20,12 @@ def batchdot_output_shape(input_shape):
     assert len(shape) == 3
     return tuple(shape)
 
+def vec_output_shape(input_shape):
+    shape = list(input_shape)
+    shape.pop(2)
+    assert len(shape) == 2
+    return tuple(shape)
+
 def apply_multiple(input_, layers):
     # "Apply layers to input then concatenate result"
     if not len(layers) > 1:
@@ -72,22 +78,17 @@ def soft_attention_alignment(input_1, input_2):
 
 def get_sentence_vector(input):
     atten_vec = Dense(1)(input)
-    shape = list(input.shape)
-    print(shape)
-    shape.pop(2)
-    print(shape)
-    atten_vec = keras.layers.Reshape(atten_vec, shape)
+    atten_vec = Lambda(lambda x: softmax(x, axis=1),
+                       output_shape=unchanged_shape)(atten_vec)
+    atten_vec = Lambda(lambda x: K.squeeze(x, axis=-1), output_shape=vec_output_shape)(atten_vec)
     sen_vector = Dot(axes=1)([atten_vec, input])
 
     return sen_vector
 
 
 def fusion_sentence_atten(input_vec, input_seq):
-    input_shape = list(input_seq.shape)
-    print(input_shape)
-    len = input_shape[1]
-    print(len)
-    input_vec_seq = keras.layers.RepeatVector()(input_vec, len)
+
+    input_vec_seq = keras.layers.RepeatVector(43)(input_vec)
     print(input_vec_seq.shape)
     seq = Concatenate()([input_seq,input_vec_seq])
 
@@ -95,7 +96,7 @@ def fusion_sentence_atten(input_vec, input_seq):
     return seq_new
 
 
-class QS(BaseModel):
+class IAN(BaseModel):
 
 
     def embedded(self):
