@@ -56,7 +56,6 @@ class HermitianDot(Layer):
         # Q1: (B, L1, dim), Q2: (B, L2, dim), mask1: (B, L1), mask2: (B, L2)
         Q1, Q2 = inputs
         mask1, mask2 = mask
-
         if self.use_bilinear:  # bilinear operation
             res = K.dot(Q1, self.kernel)  # (B, L1, dim)
             if self.activation is not None:
