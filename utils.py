@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import time
+import psutil
 
 
 def PRF(label: np.ndarray, predict: np.ndarray):
@@ -81,3 +82,13 @@ def print_metrics(metrics, metrics_type, save_dir=None):
     if save_dir is not None:
         with open(os.path.join(save_dir, "{}_logs.log".format(metrics_type)), 'a') as fw:
             [fw.write(line + '\n') for line in lines]
+
+
+def show_layer_info(layer_name, layer_out):
+    print('[layer]: %s\t[shape]: %s \n%s' % (layer_name, str(layer_out.get_shape().as_list()), show_memory_use()))
+
+
+def show_memory_use():
+    used_memory_percent = psutil.virtual_memory().percent
+    strinfo = '{}% memory has been used'.format(used_memory_percent)
+    return strinfo

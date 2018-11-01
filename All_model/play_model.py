@@ -84,7 +84,7 @@ class LiuPlayModel(LiuModel1):
 
         merged = Concatenate()([q1_rep, q2_rep])
 
-        dense = Dense(600, activation='elu')(merged)
+        dense = Dense(600, activation='tanh')(merged)
         dense = Dropout(rate=0.5)(dense)
         predictions = Dense(1, activation='sigmoid')(dense)
 
