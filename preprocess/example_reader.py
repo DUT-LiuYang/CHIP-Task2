@@ -22,10 +22,10 @@ class ExampleReader:
         rf.close()
         return np.array(embedding_matrix)
 
-    def question_pairs2question_inputs(self, inputs=[], id_questions={}):
+    def question_pairs2question_inputs(self, inputs=[], id_questions={}, max_len=43):
         question_inputs1 = []
         question_inputs2 = []
-        max_len = 0
+
         for q1, q2 in inputs:
             temp = id_questions[q1]
             question_inputs1.append(temp[:])
