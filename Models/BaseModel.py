@@ -137,13 +137,13 @@ class BaseModel:
         er = ExampleReader(r_dir)
         self.embedding_matrix = er.get_embedding_matrix(self.word_embedding_dir)
         if self.args.need_word_level:
-            self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words)
-            self.test_word_inputs1, self.test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words)
+            self.train_word_inputs1, self.train_word_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_words, max_len=self.word_max_len)
+            self.test_word_inputs1, self.test_word_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_words, max_len=self.word_max_len)
 
         if self.args.need_char_level:
             self.char_embedding_matrix = er.get_embedding_matrix(self.char_embedding_dir)
-            self.train_char_inputs1, self.train_char_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_chars)
-            self.test_char_inputs1, self.test_char_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_chars)
+            self.train_char_inputs1, self.train_char_inputs2 = er.question_pairs2question_inputs(inputs=train_data, id_questions=id_question_chars, max_len=self.char_max_len)
+            self.test_char_inputs1, self.test_char_inputs2 = er.question_pairs2question_inputs(inputs=test_data, id_questions=id_question_chars, max_len=self.char_max_len)
 
     def read_model(self, file=""):
         self.compile_model()
