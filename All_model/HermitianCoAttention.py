@@ -16,11 +16,14 @@ class HermitianCA(BaseModel):
         Q1 = bigru(Q1)
         Q2 = bigru(Q2)
 
-        Q1, Q2 = HermitianDot()([Q1, Q2])
+        Q1, Q2 = HermitianDot(use_bilinear=True)([Q1, Q2])
 
-        sa = SelfAttention(1)
-        Q1_vector = sa(Q1)
-        Q2_vector = sa(Q2)
+        # sa = SelfAttention(1)
+        # Q1_vector = sa(Q1)
+        # Q2_vector = sa(Q2)
+        bigru = Bidirectional(GRU(256, dropout=0.2))
+        Q1_vector = bigru(Q1)
+        Q2_vector = bigru(Q2)
 
         vec = [Q1_vector, Q2_vector,
                subtract([Q1_vector, Q2_vector]),
