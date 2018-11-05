@@ -42,7 +42,7 @@ class FMLayer(Layer):
         fm_interactions = fm_interactions_part1 - fm_interactions_part2
 
         latent_dim = fm_interactions
-        fm_interactions = K.tf.reduce_sum(fm_interactions, 1, keep_dims=True)
+        fm_interactions = K.tf.reduce_sum(fm_interactions, 1, keepdims=True)
         fm_interactions = K.tf.multiply(0.5, fm_interactions)
         fm_prediction = K.tf.add(fm_linear_terms, fm_interactions)
 
