@@ -33,6 +33,7 @@ class LiuModel1(BaseModel):
         args.word_emb_dir = "../instances/word_embed.txt"
         args.char_emb_dir = "../instances/char_embed.txt"
         args.r_dir = "../resource/"
+        self.name = "Bi-GRU2"
 
         super(LiuModel1, self).__init__(args)
 
@@ -76,7 +77,10 @@ class LiuModel1(BaseModel):
                           metrics_type=self.model.__class__.__name__ + self.args.selfname,
                           save_dir='../logs')
 
+            file = str(metrics['macro_prf'][2]) + "_" + str(metrics['val_loss']) + "_" + str(e + 1) + "_" + self.name
+            self.save_model(file)
+
 
 if __name__ == '__main__':
     lm1 = LiuModel1()
-    lm1.train_model(epochs=50, batch_size=64, kfold_num=5)
+    lm1.train_model(epochs=18, batch_size=64, kfold_num=5)
