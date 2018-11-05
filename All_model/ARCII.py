@@ -16,7 +16,7 @@ class ARCII(LiuModel2):
         self.num_conv2d_layers = 2
         self.mpool_sizes_2d = [[3, 3], [3, 3]]
 
-    def build(self):
+    def build_model(self):
         encoding_layer1 = Bidirectional(GRU(300,
                                             return_sequences=True,
                                             dropout=0.2))
@@ -45,7 +45,7 @@ class ARCII(LiuModel2):
         pool1_flat_drop = Dropout(rate=0.2)(pool1_flat)
         show_layer_info('Dropout', pool1_flat_drop)
 
-        out_ = Dense(1)(pool1_flat_drop)
+        out_ = Dense(1, activation='sigmoid')(pool1_flat_drop)
         show_layer_info('Dense', out_)
 
         return out_
