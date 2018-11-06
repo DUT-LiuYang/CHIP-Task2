@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 from utils import PRF, print_metrics
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from keras.models import Model
@@ -5,6 +7,13 @@ from keras.layers import *
 from keras.optimizers import get
 from preprocess.csv_reader import CsvReader
 from preprocess.example_reader import ExampleReader
+from keras.backend import tensorflow_backend as KTF
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True  # 不全部占满显存, 按需分配
+sess = tf.Session(config=config)
+
+KTF.set_session(sess)
 
 
 class BaseModel:
@@ -59,6 +68,7 @@ class BaseModel:
         self.model = Model(inputs=inputs, outputs=self.output)
         optimizer = get({'class_name': self.args.optimizer, 'config': {'lr': self.args.lr}})
         self.model.compile(optimizer=optimizer, loss=self.args.loss, metrics=['acc'])
+        self.model.summary()
 
     def one_train(self, epochs, batch_size,
                   train_data, train_label,

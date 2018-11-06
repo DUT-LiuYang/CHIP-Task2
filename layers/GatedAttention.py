@@ -46,13 +46,13 @@ class GatedAttention(Layer):
         Q12s = Q1_ - Q2_
         # gate = K.hard_sigmoid(K.dot(Q12S, self.W_minus))
         # Q12s = gate * Q12S + (1 - gate) * Q12abs
-        Q12p = (Q1_ + Q2_) / 2
-        # one = K.ones_like(Q12m)
+        # Q12p = (Q1_ + Q2_) / 2
+        one = K.ones_like(Q12m)
         all_for_one = K.concatenate([
-                                     #  Q1_ * one, Q2_ * one,
+                                     Q1_ * one, Q2_ * one,
                                      Q12m,
                                      Q12s,
-                                     Q12p
+                                     # Q12p
                                      ])
         all_for_one = K.dot(all_for_one, self.kernel)
         if self.use_bias:
