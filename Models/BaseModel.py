@@ -19,7 +19,7 @@ class BaseModel:
         # some basic parameters of the model
         self.model = None
         self.word_max_len = 43
-        self.char_max_len = 54
+        self.char_max_len = 57
         self.num_words = 9647
         self.num_chars = 2307
         self.args = args
