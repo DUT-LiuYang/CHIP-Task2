@@ -10,31 +10,7 @@ from keras import backend as K, Model
 from keras.optimizers import get
 
 
-def amsoftmax_loss(y_true, y_pred, scale=30, margin=0.35):
-    y_true = K.one_hot(K.cast(y_true, 'int32'), 2)
-    y_pred = y_true * (y_pred - margin) + (1 - y_true) * y_pred
-    y_pred *= scale
-    y_pred = K.softmax(y_pred, axis=1)
-    return K.categorical_crossentropy(y_true, y_pred)
-
-
 class IM(BaseModel):
-
-    def compile_model(self):
-        self.Q1, self.Q2, self.Q1_char, self.Q2_char = self.make_input()
-        self.Q1_emb, self.Q2_emb, self.Q1_char_emb, self.Q2_char_emb = self.embedded()
-        self.output = self.build_model()
-
-        if self.args.need_word_level:
-            inputs = [self.Q1, self.Q2]
-        else:
-            inputs = []
-        if self.args.need_char_level:
-            inputs += [self.Q1_char, self.Q2_char]
-
-        self.model = Model(inputs=inputs, outputs=self.output)
-        optimizer = get({'class_name': self.args.optimizer, 'config': {'lr': self.args.lr}})
-        self.model.compile(optimizer=optimizer, loss=amsoftmax_loss, metrics=['acc'])
 
     def update_module(self, Q1, Q2):
         bigru = Bidirectional(GRU(256, return_sequences=True,
@@ -106,12 +82,6 @@ class IM(BaseModel):
 
         vector = Dropout(self.args.dropout)(vector)
 
-        # regression = Dense(units=1, activation='sigmoid')(vector)
+        regression = Dense(units=1, activation='sigmoid')(vector)
 
-        # 这里开始是必写部分，组合上面的compile_model一起写
-        x = Lambda(lambda x: K.l2_normalize(x, 1))(vector)
-        pred = Dense(2,
-                     use_bias=False,
-                     kernel_constraint=unit_norm()
-                     )(x)
-        return pred
+        return regression

@@ -1,6 +1,6 @@
 class Config:
     mode = 'train'          # choices=['train', 'prepare', 'predict', 'evaluate']
-    model = 'IM'
+    model = 'CSRA'
 
     lr = 0.001
     dropout = 0.2
