@@ -2,6 +2,7 @@ import numpy as np
 import os
 import time
 import psutil
+import csv
 
 
 def PRF(label: np.ndarray, predict: np.ndarray):
@@ -92,3 +93,101 @@ def show_memory_use():
     used_memory_percent = psutil.virtual_memory().percent
     strinfo = '{}% memory has been used'.format(used_memory_percent)
     return strinfo
+
+
+def geometric_averaging(out_file="results/geometric_fusion_model.csv"):
+    results = []
+
+    result_files = [
+        "result1.csv",
+        "result2.csv",
+        "result3.csv",
+        "result4.csv",
+        "result5.csv",
+    ]
+    count = len(result_files)
+
+    ids = []
+
+    dir = "results/"
+    for index, file in enumerate(result_files):
+        csv_reader = csv.reader(open(dir + file, encoding='utf-8'))
+        temp = []
+        for num, row in enumerate(csv_reader):
+            if num == 0:
+                continue
+            if index == 0:
+                ids.append([row[0], row[1]])
+            # print(row[2])
+            temp.append(float(row[2]))
+        results.append(temp[:])
+    print(np.shape(results))
+
+    out = open(out_file, 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow(['qid1', 'qid2', 'label'])
+
+    for index, x in enumerate(results[0]):
+        temp = 1.0
+        # print(str(num))
+        for i in range(count):
+            # print(str(i) + " " + str(index))
+            temp *= results[i][index]
+        temp = pow(temp, 1 / count)
+        if temp > 0.5:
+            csv_write.writerow([ids[index][0], ids[index][1], 1])
+        else:
+            csv_write.writerow([ids[index][0], ids[index][1], 0])
+    out.close()
+
+
+def vote(out_file="results/vote.csv"):
+    results = []
+    result_files = [
+        "84.246.csv",
+        "84.967.csv",
+        "geometric_fusion_model.csv",
+    ]
+
+    count = len(result_files)
+
+    ids = []
+
+    dir = "results/"
+    for index, file in enumerate(result_files):
+        csv_reader = csv.reader(open(dir + file, encoding='utf-8'))
+        temp = []
+        for num, row in enumerate(csv_reader):
+            if num == 0:
+                continue
+            if index == 0:
+                ids.append([row[0], row[1]])
+            temp.append(float(row[2]))
+        results.append(temp[:])
+    print(np.shape(results))
+
+    out = open(out_file, 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow(['qid1', 'qid2', 'label'])
+
+    for index, x in enumerate(results[0]):
+
+        p_num = 0
+        n_num = 0
+
+        for i in range(count):
+            if results[i][index] > 0.5:
+                p_num += 1
+            else:
+                n_num += 1
+
+        if p_num > n_num:
+            csv_write.writerow([ids[index][0], ids[index][1], 1])
+        else:
+            csv_write.writerow([ids[index][0], ids[index][1], 0])
+    out.close()
+
+
+if __name__ == '__main__':
+    # geometric_averaging()
+    vote()
