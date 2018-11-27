@@ -42,7 +42,7 @@ class GatedAttention(Layer):
         Q1_ = K.expand_dims(Q1, axis=2)  # (B, L1, 1, dim)
         Q2_ = K.expand_dims(Q2, axis=1)  # (B, 1, L2, dim)
         Q12m = Q1_ * Q2_  # (B, L1, L2, dim)
-        # Q12abs = K.abs(Q1_ - Q2_)
+        Q12abs = K.abs(Q1_ - Q2_)
         Q12s = Q1_ - Q2_
         # gate = K.hard_sigmoid(K.dot(Q12S, self.W_minus))
         # Q12s = gate * Q12S + (1 - gate) * Q12abs
@@ -52,6 +52,7 @@ class GatedAttention(Layer):
                                      Q1_ * one, Q2_ * one,
                                      Q12m,
                                      Q12s,
+                                     Q12abs
                                      # Q12p
                                      ])
         all_for_one = K.dot(all_for_one, self.kernel)

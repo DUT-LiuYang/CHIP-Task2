@@ -8,6 +8,8 @@ from keras.layers import *
 from layers.CoAttentionLayer import CoAttentionLayer
 from layers.FMLayer import FMLayer
 from keras.optimizers import get
+
+from layers.MultiHeadAttention import MultiHeadAttention
 from layers.selfattention import SelfAttention
 
 
@@ -64,10 +66,13 @@ class CSRA(BaseModel):
     def build_model(self):
         Q1, Q2 = self.Q1_emb, self.Q2_emb
 
-        bigru = Bidirectional(GRU(256, activation='tanh', return_sequences=True, dropout=0.2))
+        bigru = Bidirectional(GRU(256, activation='tanh', return_sequences=True, dropout=0.1))
         Q1 = bigru(Q1)
         Q2 = bigru(Q2)
 
+        mha = MultiHeadAttention(n_head=8, d_model=512, d_k=64, d_v=64, dropout=0.2, mode=0, use_norm=True)
+        Q1, _ = mha(Q1, Q1, Q1)
+        Q2, _ = mha(Q2, Q2, Q2)
         beta, alpha, Q1_new, Q2_new = CoAttentionLayer(units=256)([Dropout(0.2)(Q1), Dropout(0.2)(Q2)])
 
         # fm_con = FMLayer(k=5)
@@ -83,7 +88,7 @@ class CSRA(BaseModel):
         Q1_E = concatenate([Q1] + features[0] + features[2], axis=-1)
         Q2_E = concatenate([Q2] + features[1] + features[3], axis=-1)
 
-        bigru = Bidirectional(GRU(256, activation='tanh', return_sequences=True, dropout=0.4))
+        bigru = Bidirectional(GRU(256, activation='tanh', return_sequences=True, dropout=0.2))
         Q1_vector = bigru(Q1_E)
         Q2_vector = bigru(Q2_E)
 

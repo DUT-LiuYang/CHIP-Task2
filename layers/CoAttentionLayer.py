@@ -20,11 +20,11 @@ class CoAttentionLayer(Layer):
         dim = input_shape[0][-1]
         self.kernel = self.add_weight('kernel', [2, dim, self.units],
                                       initializer=self.initializer)
-        # self.w = self.add_weight('w', [dim * 2, 1], initializer=self.initializer)
+        self.w = self.add_weight('w', [dim * 5, 1], initializer=self.initializer)
         if self.use_bias:
             self.bias = self.add_weight('bias', [2, self.units],
                                         initializer=initializers.get('zeros'))
-            # self.w_bias = self.add_weight('w_bias', [1], initializer=initializers.get('zeros'))
+            self.w_bias = self.add_weight('w_bias', [1], initializer=initializers.get('zeros'))
         else:
             self.bias = None
             self.w_bias = None
@@ -45,26 +45,28 @@ class CoAttentionLayer(Layer):
         return beta
 
     def call(self, inputs, mask=None):
-        Q1, Q2 = [self.projection(a, i=0) for a in inputs]
-        # Q1, Q2 = inputs
+        # Q1, Q2 = [self.projection(a, i=0) for a in inputs]
+        Q1, Q2 = inputs
         mask1, mask2 = [K.cast(m, dtype=K.dtype(Q1)) for m in mask]
 
-        # Q1_ = K.expand_dims(Q1, axis=2)  # (B, L1, 1, dim)
-        # Q2_ = K.expand_dims(Q2, axis=1)  # (B, 1, L2, dim)
-        # Q12m = Q1_ * Q2_  # (B, L1, L2, dim)
-        # Q12s = Q1_ - Q2_
-        # # one = K.ones_like(Q12m)
-        # all_for_one = K.concatenate([
-        #     #  Q1_ * one, Q2_ * one,
-        #     Q12m,
-        #     Q12s,
-        # ])
-        # all_for_one = K.dot(all_for_one, self.w)
-        # if self.use_bias:
-        #     all_for_one = K.bias_add(all_for_one, self.w_bias)
-        # all_for_one = K.tanh(all_for_one)
-        E = K.batch_dot(Q1, Q2, axes=[2, 2])   # (B, L1, L2)
-        # E = K.squeeze(all_for_one, axis=-1)
+        Q1_ = K.expand_dims(Q1, axis=2)  # (B, L1, 1, dim)
+        Q2_ = K.expand_dims(Q2, axis=1)  # (B, 1, L2, dim)
+        Q12m = Q1_ * Q2_  # (B, L1, L2, dim)
+        Q12s = Q1_ - Q2_
+        Q12abs = K.abs(Q1_ - Q2_)
+        one = K.ones_like(Q12m)
+        all_for_one = K.concatenate([
+            Q1_ * one, Q2_ * one,
+            Q12m,
+            Q12s,
+            Q12abs
+        ])
+        all_for_one = K.dot(all_for_one, self.w)
+        if self.use_bias:
+            all_for_one = K.bias_add(all_for_one, self.w_bias)
+        all_for_one = K.tanh(all_for_one)
+        # E = K.batch_dot(Q1, Q2, axes=[2, 2])   # (B, L1, L2)
+        E = K.squeeze(all_for_one, axis=-1)
         # beta
         beta = self.co_attention(inputs[1], E, mask2, axis=1)  # (B, L1, dim)
 
