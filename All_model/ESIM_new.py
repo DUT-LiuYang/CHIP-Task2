@@ -64,21 +64,19 @@ def minus_soft_attention_alignment(input_1, input_2):
     return in1_aligned, in2_aligned
 
 
-def substract(input_1, input_2):
-    "Substract element-wise"
+def subtract(input_1, input_2):
+    """subtract element-wise"""
     neg_input_2 = Lambda(lambda x: -x, output_shape=unchanged_shape)(input_2)
     out_ = Add()([input_1, neg_input_2])
-    # out_ = Lambda(lambda x: K.abs(x[0] - x[1]), output_shape=sum_unchanged_shape)([input_1, input_2])
     return out_
 
 
 def submult(input_1, input_2):
     "Get multiplication and subtraction then concatenate results"
     mult = Multiply()([input_1, input_2])
-    # sub = substract(input_1, input_2)
-    # out_= Concatenate()([sub, mult])
-    # return out_
-    return mult
+    sub = subtract(input_1, input_2)
+    out_= Concatenate()([sub, mult])
+    return out_
 
 
 def apply_multiple(input_, layers):
@@ -109,8 +107,8 @@ class LiuModel2(LiuModel1):
         encoded_sentence_1 = word_encoding_layer1(self.Q1_emb)  # (?, len, 600)
         encoded_sentence_2 = word_encoding_layer1(self.Q2_emb)  # (?, len, 600)
 
-        # q1_aligned, q2_aligned = minus_soft_attention_alignment(encoded_sentence_1, encoded_sentence_2)
-        q1_aligned, q2_aligned = soft_attention_alignment(encoded_sentence_1, encoded_sentence_2)
+        q1_aligned, q2_aligned = minus_soft_attention_alignment(encoded_sentence_1, encoded_sentence_2)
+        # q1_aligned, q2_aligned = soft_attention_alignment(encoded_sentence_1, encoded_sentence_2)
 
         q1_combined = Concatenate()([encoded_sentence_1, q2_aligned, submult(encoded_sentence_1, q2_aligned)])
         q2_combined = Concatenate()([encoded_sentence_2, q1_aligned, submult(encoded_sentence_2, q1_aligned)])
@@ -183,8 +181,7 @@ class LiuModel2(LiuModel1):
         return embedded
 
     def predict(self):
-        # results = self.model.predict([self.test_word_inputs1, self.test_word_inputs2, self.test_char_inputs1, self.test_char_inputs2], batch_size=128, verbose=1)
-        results = self.model.predict([self.train_word_inputs1, self.train_word_inputs2, self.train_char_inputs1, self.train_char_inputs2], batch_size=128, verbose=1)
+        results = self.model.predict([self.test_word_inputs1, self.test_word_inputs2, self.test_char_inputs1, self.test_char_inputs2], batch_size=128, verbose=1)
         self.write_results2file(results,
                                 file="../results/stacking/train/result1_83.68.csv")
 
@@ -199,10 +196,6 @@ class LiuModel2(LiuModel1):
         print(str(np.shape(results)))
         csv_write.writerow(['qid1', 'qid2', 'label'])
         for ids, i in zip(test_data, results):
-            # if i[0] > 0.5:
-            #     csv_write.writerow([ids[0], ids[1], 1])
-            # else:
-            #     csv_write.writerow([ids[0], ids[1], 0])
             csv_write.writerow([ids[0], ids[1], i[0]])
         out.close()
 
