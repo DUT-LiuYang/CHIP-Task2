@@ -24,9 +24,10 @@ class LiuModel1(BaseModel):
 
         args.optimizer = 'adam'
         args.loss = 'binary_crossentropy'
-        args.need_char_level = False
+        args.need_char_level = True
         args.need_word_level = True
         args.word_trainable = False
+        args.char_trainable = False
         args.lr = 0.001
 
         args.save_dir = "../saved_models/"
@@ -38,18 +39,34 @@ class LiuModel1(BaseModel):
         super(LiuModel1, self).__init__(args)
 
     def build_model(self):
-        encoding_layer1 = Bidirectional(GRU(300,
-                                            return_sequences=True,
-                                            dropout=0.2))
-        encoded_sentence_1 = encoding_layer1(self.Q1_emb)  # (?, len, 600)
-        encoded_sentence_2 = encoding_layer1(self.Q2_emb)  # (?, len, 600)
+        word_encoding_layer1 = Bidirectional(GRU(300,
+                                                 return_sequences=True,
+                                                 dropout=0.2))
+        encoded_sentence_1 = word_encoding_layer1(self.Q1_emb)  # (?, len, 600)
+        encoded_sentence_2 = word_encoding_layer1(self.Q2_emb)  # (?, len, 600)
 
-        encoding_layer2 = Bidirectional(GRU(300,
-                                            return_sequences=False,
-                                            dropout=0.2))
+        word_encoding_layer2 = Bidirectional(GRU(300,
+                                                 return_sequences=False,
+                                                 dropout=0.2))
 
-        encoded_sentence_1 = encoding_layer2(encoded_sentence_1)
-        encoded_sentence_2 = encoding_layer2(encoded_sentence_2)
+        word_encoded_sentence_1 = word_encoding_layer2(encoded_sentence_1)
+        word_encoded_sentence_2 = word_encoding_layer2(encoded_sentence_2)
+
+        char_encoding_layer1 = Bidirectional(GRU(300,
+                                                 return_sequences=True,
+                                                 dropout=0.2))
+        encoded_sentence_1 = char_encoding_layer1(self.Q1_char_emb)  # (?, len, 600)
+        encoded_sentence_2 = char_encoding_layer1(self.Q2_char_emb)  # (?, len, 600)
+
+        char_encoding_layer2 = Bidirectional(GRU(300,
+                                                 return_sequences=False,
+                                                 dropout=0.2))
+
+        char_encoded_sentence_1 = char_encoding_layer2(encoded_sentence_1)
+        char_encoded_sentence_2 = char_encoding_layer2(encoded_sentence_2)
+
+        encoded_sentence_1 = keras.layers.concatenate([word_encoded_sentence_1, char_encoded_sentence_1])
+        encoded_sentence_2 = keras.layers.concatenate([word_encoded_sentence_2, char_encoded_sentence_2])
 
         x1 = keras.layers.multiply([encoded_sentence_1, encoded_sentence_2])
         x2 = Lambda(difference,
