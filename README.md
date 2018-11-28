@@ -37,5 +37,5 @@ question_id.csv、word_embedding、char_embedding、train.csv、test.csv。quest
 - 采用Bi-GRU以外的编码器，比如Transformer等
 - 利用给定语料预训练语言模型
 
-2018参加了两次文本相似度匹配的竞赛，在弥补了一些遗憾的同时留下了新的遗憾
+2018参加了两次文本相似度匹配的竞赛，在弥补了一些遗憾的同时留下了新的遗憾  
 下次比赛见
